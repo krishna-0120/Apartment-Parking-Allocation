@@ -10,32 +10,25 @@ allocations = {}
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    global residents, allocations
     message = ""
+
+    global residents, allocations
 
     if request.method == "POST":
         action = request.form.get("action")
 
         if action == "add":
-            flat = request.form["flat"]
-            name = request.form["name"]
+            flat = request.form.get("flat")
+            name = request.form.get("name")
 
             for resident in residents:
                 if resident["flat"] == flat:
                     message = "Flat already exists!"
-                    return render_template(
-                        "index.html",
-                        message=message,
-                        allocations=allocations
-                    )
+                    return render_template("index.html", message=message, allocations=allocations)
 
                 if resident["name"].lower() == name.lower():
                     message = "Resident already exists!"
-                    return render_template(
-                        "index.html",
-                        message=message,
-                        allocations=allocations
-                    )
+                    return render_template("index.html", message=message, allocations=allocations)
 
             residents.append({
                 "flat": flat,
@@ -45,7 +38,7 @@ def home():
             message = "Resident added successfully!"
 
         elif action == "allocate":
-            slots = int(request.form["slots"])
+            slots = int(request.form.get("slots"))
 
             if slots < len(residents):
                 message = "Not enough parking slots!"
@@ -72,14 +65,9 @@ def home():
 
                 wb.save("parking_allocation.xlsx")
 
-                message = "Parking allocated and Excel file saved!"
+                message = "Parking allocated successfully!"
 
-    return render_template(
-        "index.html",
-        message=message,
-        allocations=allocations
-    )
+    return render_template("index.html", message=message, allocations=allocations)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
