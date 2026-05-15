@@ -1,44 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parking Allocation System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Parking Management</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-
 <div class="container">
-    <h1>🚗 Apartment Parking Allocation</h1>
-
-    <h3>Add Resident</h3>
-    <form method="POST">
-        <input type="text" name="flat" placeholder="Enter Flat Number" required>
-        <input type="text" name="name" placeholder="Enter Resident Name" required>
-        <button type="submit" name="action" value="add">Add Resident</button>
-    </form>
-
-    <h3>Allocate Parking</h3>
-    <form method="POST">
-        <input type="number" name="slots" placeholder="Enter Number of Parking Slots" required>
-        <button type="submit" name="action" value="allocate">Allocate Parking</button>
-    </form>
-
-    {% if message %}
-        <div class="message">{{ message }}</div>
-    {% endif %}
-
-    {% if allocations %}
-    <div class="results">
-        <h3>Parking Allocation Results</h3>
-        {% for flat, data in allocations.items() %}
-            <div class="result-item">
-                <strong>Flat {{ flat }}</strong> | {{ data.name }} → <b>{{ data.slot }}</b>
-            </div>
-        {% endfor %}
-    </div>
-    {% endif %}
+<h1>Smart Apartment Parking Management</h1>
+<div class="dashboard">
+<div class="card">Residents: {{ total_residents }}</div>
+<div class="card">Occupied: {{ occupied_slots }}</div>
+<div class="card">Available: {{ available_slots }}</div>
 </div>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}
+<div class="message {{ category }}">{{ message }}</div>
+{% endfor %}
+{% endwith %}
+
+<form action="/add" method="POST">
+<input type="text" name="flat" placeholder="Flat Number" required>
+<input type="text" name="name" placeholder="Resident Name" required>
+<input type="text" name="vehicle_number" placeholder="Vehicle Number" required>
+<select name="vehicle_type">
+<option>Car</option>
+<option>Bike</option>
+<option>SUV</option>
+</select>
+<button>Add Resident</button>
+</form>
+
+<form action="/allocate" method="POST">
+<input type="number" name="slots" placeholder="Parking Slots" required>
+<button>Allocate Parking</button>
+</form>
+
+<div class="buttons">
+<a href="/export/excel">Download Excel</a>
+<a href="/export/pdf">Download PDF</a>
+</div>
+
+<table>
+<tr><th>Flat</th><th>Name</th><th>Vehicle</th><th>Type</th><th>Slot</th></tr>
+{% for r in residents %}
+<tr>
+<td>{{ r[0] }}</td><td>{{ r[1] }}</td><td>{{ r[2] }}</td><td>{{ r[3] }}</td><td>{{ r[4] or 'Not Allocated' }}</td>
+</tr>
+{% endfor %}
+</table>
+</div>
 </body>
 </html>
